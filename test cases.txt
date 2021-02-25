@@ -1,0 +1,25 @@
++ Test case 1 - Sing in
+1. Go to main page
+2. Click Sign In
+3. Input login and password
+4. Check that user login successfully
+
++ Test case 2 - contact us
+1. Go to main page
+2. Click Contact Us
+3. Fill all fields
+4. Click send
+5. Check mesaage about sending
+
++ Test case 3 - Check required fields in *Contact us* page
+1. Go to main page
+2. Click Contact Us
+3. Fill all fields without *Message* field
+4. Click send
+5. Check error about required field
+
+
++ Test case 4 - Write to log
+1. Go to main page
+2. Click on *Woman* button
+3. Write to log file all names goods

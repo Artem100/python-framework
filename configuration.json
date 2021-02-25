@@ -1,0 +1,5 @@
+{
+  "dataJson": "//src//resources//input_data//envs_creds//qa_env//data.json",
+  "inputData": "//src//resources//input_data//envs_creds//qa_env//user1_input_data.json",
+  "global_data": "//src//resources//input_data//global_data.json"
+}
