@@ -1,10 +1,12 @@
 import logging
 from faker import Faker
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, InvalidArgumentException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.errorhandler import ErrorHandler
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support.select import Select
 
 def format_selector(by, locator, name=None):
 	selector = (by, locator)
@@ -131,3 +133,73 @@ class BasePage(object):
 		except AssertionError as e:
 			BasePage.LOGGER.error("Element < {0} > is displayed on page. {1} \n{2}}".format(name, selector, e))
 			raise AssertionError("Element < {0} > is displayed on page. {1} \n{2}}".format(name, selector, e))
+
+
+	def read_values_from_elements_and_make_list_text_values(self, *selector):
+		""""
+		Create list from text values of list elements, than check text_value on occurrence in list
+		"""""
+		selector, name = format_selector(*selector)
+		elements = self.find_elements_visibility(selector, name)
+		try:
+			self.LOGGER.info("Read values from elements < {} > and save values in list".format(name))
+			values = []
+			for value in elements:
+				values.append(value.text)
+			return values
+		except Exception as e:
+			BasePage.LOGGER.warning("Test can't Read values from elements < {0} >. {1} \n{2}".format(name, selector, e))
+			raise Exception("Test can't Read values from elements < {0} >. {1} \n{2}".format(name, selector, e))
+
+	def count_of_elements(self, count, *selector):
+		selector, name = format_selector(*selector)
+		elements = self.find_elements_visibility(selector, name)
+		self.LOGGER.info("Check count of < {} > elements".format(name))
+		try:
+			assert len(elements) == int(count)
+		except AssertionError:
+			BasePage.LOGGER.error(
+				"Count value doesn't match with test in element < {0} >.\nActual result: {1}\nExpected result: {2}".format(
+					name, len(elements), count))
+			raise AssertionError(
+				"Count value doesn't match with test in element < {0} >.\nActual result: {1}\nExpected result: {2}".format(
+					name, len(elements), count))
+
+
+	def select_value_in_dropdown_by_option_visible_text(self, text, *selector):
+		selector, name = format_selector(*selector)
+		element = Select(self.find_element_located(selector, name))
+		self.LOGGER.info(f"Select value < {text} > from the list *{selector}*")
+		try:
+			element.select_by_visible_text(text)
+		except Exception as e:
+			BasePage.LOGGER.warning(f"Test couldn't select value by text: < {text} > in the list: {selector}")
+			raise Exception(f"Test couldn't select value by text: < {text} >  in the list: {selector}")
+
+	def backspace_button_all(self, *selector):
+		selector, name = format_selector(*selector)
+		element = self.find_element_clickable(selector, name)
+		self.LOGGER.info("Clear text field < {} > use the BASCKSPACE button".format(name))
+		try:
+			length = len(element.get_attribute('value'))
+			element.send_keys(length * Keys.BACKSPACE)
+		except TypeError:
+			BasePage.LOGGER.warning("Field is clear already")
+		except Exception as e:
+			BasePage.LOGGER.warning(
+				"Test can't clear text in < {0} > field use the BASCKSPACE button. {1} \n{2}".format(name, selector, e))
+			raise Exception(
+				"Test can't clear text in < {0} > field use the BASCKSPACE button. {1} \n{2}".format(name, selector, e))
+
+	def upload_file(self, path, *selector):
+		selector, name = format_selector(*selector)
+		element = self.find_element_located(selector, name)
+		self.LOGGER.info("Upload file by path : * {} * to < {} > element.".format(path, name))
+		try:
+			element.send_keys(path)
+		except InvalidArgumentException as e:
+			BasePage.LOGGER.warning(f"Test can't find file in project by path: < {path} >\n{e}")
+			raise Exception(f"Test can't find file in project by path: < {path} >\n{e}")
+		except Exception as e:
+			BasePage.LOGGER.warning("Test can't upload image to element < {0} >\n < {1} > \n < {2} >".format(name, selector, e))
+			raise Exception("Test can't upload image to element < {0} >\n < {1} > \n < {2} >".format(name, selector, e))
